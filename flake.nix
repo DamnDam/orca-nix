@@ -3,39 +3,55 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       nixpkgs,
-      flake-utils,
       ...
     }:
-    flake-utils.lib.eachSystem
-      [
+    let
+      supportedSystems = [
         "x86_64-linux"
         "aarch64-linux"
-      ]
-      (
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+    in
+    {
+      packages = forAllSystems (
         system:
         let
           pkgs = import nixpkgs { inherit system; };
           orca = pkgs.callPackage ./pkgs/orca { };
         in
         {
-          packages = {
-            default = orca;
-            inherit orca;
-          };
+          default = orca;
+          inherit orca;
+        }
+      );
 
-          apps.default = {
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          orca = pkgs.callPackage ./pkgs/orca { };
+        in
+        {
+          default = {
             type = "app";
             program = "${orca}/bin/orca";
             meta.description = "Run Orca";
           };
+        }
+      );
 
-          devShells.default = pkgs.mkShell {
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          default = pkgs.mkShell {
             packages = with pkgs; [
               jq
               nixfmt
@@ -43,8 +59,8 @@
             ];
           };
         }
-      )
-    // {
+      );
+
       overlays.default = final: _prev: {
         orca = final.callPackage ./pkgs/orca { };
       };
