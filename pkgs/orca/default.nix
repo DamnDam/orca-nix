@@ -1,8 +1,11 @@
 {
   appimageTools,
   fetchurl,
+  gobject-introspection,
   lib,
   makeWrapper,
+  python313,
+  writeShellScriptBin,
   stdenv,
 }:
 
@@ -32,11 +35,25 @@ let
     pname = "orca";
     inherit version src;
   };
+
+  pythonWithAtspi = python313.withPackages (pythonPackages: [ pythonPackages.pygobject3 ]);
+
+  # Keep this provider inside Orca's FHS root only. The sidecar requests
+  # `python3`, but Orca's other Python environment may not include PyGObject.
+  python3Provider = writeShellScriptBin "python3" ''
+    export GI_TYPELIB_PATH="/usr/lib/girepository-1.0''${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+    export LD_LIBRARY_PATH="/usr/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    exec ${pythonWithAtspi}/bin/python3 "$@"
+  '';
 in
 appimageTools.wrapType2 {
   pname = "orca";
   inherit version src;
   nativeBuildInputs = [ makeWrapper ];
+  extraPkgs = pkgs: [
+    gobject-introspection
+    python3Provider
+  ];
 
   extraInstallCommands = ''
     wrapProgram $out/bin/orca --add-flags --no-sandbox
