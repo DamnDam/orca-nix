@@ -11,7 +11,7 @@ development environment for working with parallel coding agents.
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    orca.url = "github:stslex/orca-nix";
+    orca.url = "github:DamnDam/orca-nix";
     orca.inputs.nixpkgs.follows = "nixpkgs";
   };
 }
@@ -41,7 +41,7 @@ development environment for working with parallel coding agents.
 ### Ad-hoc run
 
 ```bash
-nix run github:stslex/orca-nix
+nix run github:DamnDam/orca-nix
 ```
 
 ## Updating
