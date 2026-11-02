@@ -3,9 +3,6 @@ name: Update Orca
 on:
   schedule:
     - cron: "30 3 * * *"
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       version:
@@ -17,18 +14,25 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check flake inputs
+        uses: DeterminateSystems/flake-checker-action@v14
+
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v23
 
       - name: Save old version
         run: |
@@ -36,9 +40,11 @@ jobs:
           echo "OLD=$OLD" >> "$GITHUB_ENV"
 
       - name: Run update script
+        env:
+          ORCA_VERSION: ${{ inputs.version }}
         run: |
-          if [[ -n "${{ inputs.version }}" ]]; then
-            ./scripts/update.sh "${{ inputs.version }}"
+          if [[ -n "$ORCA_VERSION" ]]; then
+            ./scripts/update.sh "$ORCA_VERSION"
           else
             ./scripts/update.sh
           fi

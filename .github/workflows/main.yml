@@ -1,0 +1,39 @@
+name: Check and build all packages
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check flake
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Check flake inputs
+        uses: DeterminateSystems/flake-checker-action@v14
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v23
+      - name: Check flake
+        run: nix flake check
+
+  build:
+    name: Build Orca
+    needs: check
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v23
+      - name: Build Orca
+        run: nix build .#orca
