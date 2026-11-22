@@ -1,7 +1,7 @@
 {
-  "version": "1.4.268",
+  "version": "1.4.269",
   "hashes": {
-    "x86_64-linux": "sha256-ITO6RoRXiy4FIQvzD4boyvH6oXlDBFAeJ57LIwyqPv4=",
-    "aarch64-linux": "sha256-kDkdWuywsi15qmYt621HzivLsWs/DiklWG4H8LEecgM="
+    "x86_64-linux": "sha256-9/9anNIBwjD9pwCcYr2v7QwEobPmmZwdR9FjS0yua6k=",
+    "aarch64-linux": "sha256-TDOSR2/Ql0suJU84ofLwFfooDG+w5n19mWIHmg0OCZg="
   }
 }
